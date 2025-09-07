@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -31,7 +31,7 @@ if (missingVars.length > 0) {
   console.log('? All Firebase environment variables are present');
 }
 
-console.log('Firebase config status:', {
+console.log('?? Firebase config status:', {
   projectId: firebaseConfig.projectId || '? MISSING',
   authDomain: firebaseConfig.authDomain || '? MISSING',
   hasApiKey: !!firebaseConfig.apiKey,
@@ -40,34 +40,16 @@ console.log('Firebase config status:', {
 });
 
 // Initialize Firebase
-let app;
-try {
-  app = initializeApp(firebaseConfig);
-  console.log('? Firebase app initialized successfully');
-} catch (error) {
-  console.error('? Firebase initialization failed:', error);
-  throw new Error(`Firebase initialization failed: ${error}`);
-}
+const app: FirebaseApp = initializeApp(firebaseConfig);
+console.log('? Firebase app initialized successfully');
 
 // Initialize Firestore
-let db;
-try {
-  db = getFirestore(app);
-  console.log('? Firestore initialized successfully');
-} catch (error) {
-  console.error('? Firestore initialization failed:', error);
-  throw new Error(`Firestore initialization failed: ${error}`);
-}
+const db: Firestore = getFirestore(app);
+console.log('? Firestore initialized successfully');
 
-// Initialize Storage
-let storage;
-try {
-  storage = getStorage(app);
-  console.log('? Firebase Storage initialized successfully');
-} catch (error) {
-  console.error('? Firebase Storage initialization failed:', error);
-  // Storage is optional for this app, so don't throw
-}
+// Initialize Storage (optional)
+const storage: FirebaseStorage = getStorage(app);
+console.log('? Firebase Storage initialized successfully');
 
 export { db, storage };
 export default app;
