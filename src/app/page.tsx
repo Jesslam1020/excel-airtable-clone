@@ -188,16 +188,22 @@ export default function Home() {
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
 
   // --- Load data from Firebase on mount ---
   useEffect(() => {
     const loadData = async () => {
       try {
+        console.log('?? Loading data from Firebase...');
+        
         // Load file sessions
         const sessionsResponse = await fetch('/api/sessions');
         const sessionsData = await sessionsResponse.json();
         if (sessionsData.success) {
           setFileSessions(sessionsData.sessions);
+          console.log('? File sessions loaded:', sessionsData.sessions.length);
+        } else {
+          console.error('? Failed to load sessions:', sessionsData.error);
         }
 
         // Load relationships
@@ -205,10 +211,13 @@ export default function Home() {
         const relationshipsData = await relationshipsResponse.json();
         if (relationshipsData.success) {
           setRelationships(relationshipsData.relationships);
+          console.log('? Relationships loaded:', relationshipsData.relationships.length);
+        } else {
+          console.error('? Failed to load relationships:', relationshipsData.error);
         }
       } catch (error) {
-        console.error('Error loading data:', error);
-        setError('Error loading saved data');
+        console.error('? Error loading data:', error);
+        setError('Error loading saved data. Please refresh the page.');
       }
     };
 
@@ -280,18 +289,27 @@ export default function Home() {
     const file = acceptedFiles[0];
     if (!file) return;
 
+    console.log('?? File dropped:', file.name, 'Size:', file.size);
+
     setIsLoading(true);
     setError(null);
+    setUploadProgress('Preparing file...');
 
     const formData = new FormData();
     formData.append('file', file);
 
     try {
+      setUploadProgress('Uploading file...');
+      
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
+      
+      setUploadProgress('Processing response...');
       const data = await response.json();
+
+      console.log('?? Upload response:', data);
 
       if (data.success) {
         const newSession: FileSession = {
@@ -306,14 +324,20 @@ export default function Home() {
         setActiveSheetName(firstSheetName);
         setLocalSearchTerm('');
         setGlobalSearchTerm('');
+        setUploadProgress('');
+        
+        console.log('? File uploaded successfully!');
 
       } else {
+        console.error('? Upload failed:', data.error);
         setError(data.error || 'Failed to process the file.');
       }
     } catch (err) {
-      setError('An unexpected error occurred.');
+      console.error('? Upload error:', err);
+      setError('Network error occurred. Please check your internet connection and try again.');
     } finally {
       setIsLoading(false);
+      setUploadProgress('');
     }
   }, []);
 
@@ -325,6 +349,7 @@ export default function Home() {
       'text/csv': ['.csv'],
     },
     maxFiles: 1,
+    maxSize: 10 * 1024 * 1024, // 10MB limit
   });
 
   const handleFileSelect = (fileId: string) => {
@@ -411,12 +436,19 @@ export default function Home() {
             >
               <input {...getInputProps()} />
               {isLoading ? (
-                <p className="text-sm text-gray-600">Processing...</p>
+                <div className="text-sm text-gray-600">
+                  <div className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                  {uploadProgress || 'Processing...'}
+                </div>
               ) : (
-                <p className="text-sm text-gray-600">Drop a new file or click here</p>
+                <p className="text-sm text-gray-600">
+                  {isDragActive 
+                    ? 'Drop your Excel/CSV file here...' 
+                    : 'Drop a file or click here'}
+                </p>
               )}
             </div>
-            <h2 className="text-lg font-semibold mb-2 text-gray-700">Saved Files</h2>
+            <h2 className="text-lg font-semibold mb-2 text-gray-700">Saved Files ({fileSessions.length})</h2>
             {fileSessions.length === 0 ? (
               <p className="text-sm text-gray-500">No files uploaded yet.</p>
             ) : (
@@ -428,8 +460,12 @@ export default function Home() {
                       className={`w-full text-left p-2 rounded text-sm ${
                         activeFileId === session.id ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'
                       }`}
+                      title={session.fileName}
                     >
-                      {session.fileName}
+                      <div className="truncate">{session.fileName}</div>
+                      <div className="text-xs opacity-75">
+                        {Object.keys(session.sheets).length} sheet(s)
+                      </div>
                     </button>
                   </li>
                 ))}
@@ -440,7 +476,7 @@ export default function Home() {
                 onClick={() => setIsRelationshipModalOpen(true)}
                 className="w-full bg-gray-600 text-white p-2 rounded text-sm hover:bg-gray-700"
                >
-                 Manage Relationships
+                 Manage Relationships ({relationships.length})
                </button>
             </div>
           </aside>
@@ -519,8 +555,16 @@ export default function Home() {
               ) : (
                 // Welcome / Initial View
                 <div className="text-center text-gray-500 pt-10">
-                  <p>Welcome to your Excel Database Manager.</p>
-                  <p>Upload a file or select from your saved files to get started.</p>
+                  <h2 className="text-xl font-semibold mb-4">Welcome to Excel Database Manager</h2>
+                  <p className="mb-2">Upload an Excel or CSV file to get started</p>
+                  <p className="text-sm">
+                    Your files will be automatically saved and synced across sessions
+                  </p>
+                  {fileSessions.length > 0 && (
+                    <p className="mt-4 text-blue-600">
+                      Or select a previously uploaded file from the sidebar
+                    </p>
+                  )}
                 </div>
               )}
             </div>
