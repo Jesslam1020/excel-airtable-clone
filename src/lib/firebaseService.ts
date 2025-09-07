@@ -140,9 +140,31 @@ export const getFileSession = async (sessionId: string): Promise<{ id: string; f
   }
 };
 
+export const updateFileSession = async (sessionId: string, updates: Partial<{ fileName: string; sheets: { [key: string]: any[][] } }>): Promise<void> => {
+  try {
+    const docRef = doc(db, FILE_SESSIONS_COLLECTION, sessionId);
+    const updateData: any = {};
+    
+    if (updates.fileName) {
+      updateData.fileName = updates.fileName;
+    }
+    
+    if (updates.sheets) {
+      updateData.sheets = prepareSheetsForFirebase(updates.sheets);
+    }
+    
+    await updateDoc(docRef, updateData);
+    console.log('File session updated successfully');
+  } catch (error) {
+    console.error('Error updating file session:', error);
+    throw error;
+  }
+};
+
 export const deleteFileSession = async (sessionId: string): Promise<void> => {
   try {
     await deleteDoc(doc(db, FILE_SESSIONS_COLLECTION, sessionId));
+    console.log('File session deleted successfully');
   } catch (error) {
     console.error('Error deleting file session:', error);
     throw error;
