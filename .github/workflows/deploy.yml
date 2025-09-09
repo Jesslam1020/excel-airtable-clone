@@ -24,7 +24,7 @@ jobs:
         run: npm ci
           
       - name: 🔍 Lint code
-        run: npm run lint
+        run: npm run lint --if-present
         
       - name: 🏗️ Build project
         run: npm run build
