@@ -19,23 +19,26 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: packages/cli/excel-airtable-clone/package-lock.json
           
       - name: 🔍 Check files
         run: |
-          echo "Current directory: $(pwd)"
-          echo "Directory contents:"
+          echo "Repository root directory: $(pwd)"
+          echo "Repository contents:"
           ls -la
-          echo "Package.json exists:"
-          test -f package.json && echo "✅ Found" || echo "❌ Not found"
+          echo "Checking for project directory:"
+          test -d packages/cli/excel-airtable-clone && echo "✅ Project directory found" || echo "❌ Project directory not found"
           
       - name: 🔧 Install dependencies
+        working-directory: packages/cli/excel-airtable-clone
         run: npm ci
           
       - name: 🔍 Lint code
+        working-directory: packages/cli/excel-airtable-clone
         run: npm run lint --if-present
         
       - name: 🏗️ Build project
+        working-directory: packages/cli/excel-airtable-clone
         run: npm run build
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
@@ -53,6 +56,7 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           scope: ${{ secrets.VERCEL_ORG_ID }}
+          working-directory: packages/cli/excel-airtable-clone
           
       - name: 🚀 Deploy to Vercel (Production)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -63,3 +67,4 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
           scope: ${{ secrets.VERCEL_ORG_ID }}
+          working-directory: packages/cli/excel-airtable-clone
