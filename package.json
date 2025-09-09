@@ -8,7 +8,16 @@
     "start": "next start",
     "lint": "next lint",
     "deploy:vercel": "vercel --prod",
-    "deploy:build": "npm run build && npm run start"
+    "deploy:build": "npm run build && npm run start",
+    "deploy:preview": "vercel",
+    "deploy:auto": "git add . && git commit -m \"🚀 Auto-deploy\" && git push origin main",
+    "setup:windows": "scripts\\setup.bat",
+    "setup:unix": "chmod +x scripts/setup.sh && scripts/setup.sh",
+    "quick-deploy:windows": "scripts\\quick-deploy.bat",
+    "quick-deploy:unix": "chmod +x scripts/quick-deploy.sh && scripts/quick-deploy.sh",
+    "firebase:deploy": "firebase deploy",
+    "firebase:rules": "firebase deploy --only firestore:rules",
+    "export": "next build && next export"
   },
   "dependencies": {
     "firebase": "^12.2.0",
