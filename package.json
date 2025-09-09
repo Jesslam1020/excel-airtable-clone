@@ -11,6 +11,8 @@
     "deploy:build": "npm run build && npm run start",
     "deploy:preview": "vercel",
     "deploy:auto": "git add . && git commit -m \"🚀 Auto-deploy\" && git push origin main",
+    "deploy:manual:windows": "scripts\\manual-deploy.bat",
+    "deploy:manual:unix": "chmod +x scripts/manual-deploy.sh && scripts/manual-deploy.sh",
     "setup:windows": "scripts\\setup.bat",
     "setup:unix": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "quick-deploy:windows": "scripts\\quick-deploy.bat",
