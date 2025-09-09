@@ -19,18 +19,14 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
           
-      - name:  Install dependencies
-        working-directory: packages/cli/excel-airtable-clone
+      - name: 🔧 Install dependencies
         run: npm ci
           
       - name: 🔍 Lint code
-        working-directory: packages/cli/excel-airtable-clone
         run: npm run lint
         
       - name: 🏗️ Build project
-        working-directory: packages/cli/excel-airtable-clone
         run: npm run build
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
@@ -47,7 +43,6 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: packages/cli/excel-airtable-clone
           scope: ${{ secrets.VERCEL_ORG_ID }}
           
       - name: 🚀 Deploy to Vercel (Production)
@@ -58,15 +53,4 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
-          working-directory: packages/cli/excel-airtable-clone
           scope: ${{ secrets.VERCEL_ORG_ID }}
-          
-      - name: 🔥 Update Firebase Firestore (Production only)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        working-directory: packages/cli/excel-airtable-clone
-        run: |
-          npm install -g firebase-tools
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > firebase-service-account.json
-          firebase deploy --only firestore --project ${{ secrets.FIREBASE_PROJECT_ID }} --token "${{ secrets.FIREBASE_TOKEN }}"
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
